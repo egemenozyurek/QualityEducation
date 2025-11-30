@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import edutrackapp.dashboard.StudentDashboard;
 import edutrackapp.dashboard.TeacherDashboard;
+import edutrackapp.dashboard.TimeTable;
 
 /**
  * Login screen UI with account creation option.
@@ -171,10 +172,12 @@ public class LoginScreen extends JFrame implements ActionListener {
         }
 
         if (loggedUser.getRole().equalsIgnoreCase("student")) {
-            new StudentDashboard(loggedUser).setVisible(true);
+            TimeTable timeTable = new TimeTable();
+            new StudentDashboard(loggedUser, timeTable).setVisible(true);
             dispose();
         } else {
-            new TeacherDashboard(loggedUser).setVisible(true);
+            TimeTable timeTable = new TimeTable();
+            new TeacherDashboard(loggedUser, timeTable).setVisible(true);
             dispose();
         }
     }

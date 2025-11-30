@@ -15,58 +15,64 @@ import java.awt.event.ActionListener;
 
 /**
  *
- * @author dhali
+ * @author dhali, egeme
  */
 public class StudentDashboard extends JFrame {
+
     private static final ProgressTracker PROGRESS_TRACKER = new ProgressTracker();
     private final User loggedUser;
-    
-    public StudentDashboard(User loggedUser) {
+    private final TimeTable timeTable;
+
+    public StudentDashboard(User loggedUser, TimeTable timeTable) {
         this.loggedUser = loggedUser;
+        this.timeTable = timeTable;
         setupUI();
-    }
+    }      
+    
 
     private void setupUI() {
-        setTitle("EduTrack - Student Dashboard");
-        setSize(600, 400);
+        setTitle("Timetable - " + loggedUser);
+        setSize(800, 600);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        //button
-        JPanel panel = new JPanel();
-        panel.setBackground(new Color(20, 26, 40));
-        panel.setLayout(new BorderLayout());
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(8, 8));
 
-        // creating the welcome label
-        JLabel lbl = new JLabel("Welcome, " + loggedUser.getName() + " (Student)",
-                SwingConstants.CENTER);
-        lbl.setForeground(Color.WHITE);
-        lbl.setFont(new Font("SansSerif", Font.BOLD, 20));
+        JLabel header = new JLabel("Timetable for " + loggedUser, SwingConstants.CENTER);
+        header.setFont(new Font("SansSerif", Font.BOLD, 18));
+        add(header, BorderLayout.NORTH);
 
-        panel.add(lbl, BorderLayout.NORTH);
+        // weekly grid panel (simple)
+        JPanel gridPanel = new JPanel(new GridLayout(2, 5, 6, 6));
+        String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+        for (String d : days) {
+            JLabel l = new JLabel(d, SwingConstants.CENTER);
+            l.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+            gridPanel.add(l);
+        }
+        for (String d : days) {
+            JTextArea area = new JTextArea(getTextForDay(d));
+            area.setEditable(false);
+            area.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+            gridPanel.add(new JScrollPane(area));
+        }
+        add(gridPanel, BorderLayout.CENTER);
 
-        // creating the button panel
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(new Color(20, 26, 40));
-        buttonPanel.setLayout(new FlowLayout());
+        // bottom: close button
+        JButton close = new JButton("Close");
+        close.addActionListener(e -> dispose());
+        JPanel bottom = new JPanel();
+        bottom.add(close);
+        add(bottom, BorderLayout.SOUTH);
+    }
 
-        JButton progressBtn = new JButton("Progress & Quiz");
-        progressBtn.setBackground(new Color(40, 46, 60));
-        progressBtn.setForeground(Color.WHITE);
-        progressBtn.setFocusPainted(false);
-
-        // recording the action of the user
-        progressBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ProgressForm form =
-                        new ProgressForm(loggedUser.getName(), PROGRESS_TRACKER);
-                form.setVisible(true);
+    private String getTextForDay(String day) {
+        StringBuilder sb = new StringBuilder();
+        for (ClassSession s : timeTable.getSessions()) {
+            if (s.getDay().equalsIgnoreCase(day)) {
+                sb.append(s.getTopic()).append(" ").append(s.getStartTime()).append("-").append(s.getEndTime());
+                sb.append(" (").append(s.getSessionType()).append(")\n");
             }
-        });
-        // adding the button to the panel
-        buttonPanel.add(progressBtn);
-        panel.add(buttonPanel, BorderLayout.CENTER);
-        add(panel);
+        }
+        return sb.length() == 0 ? "-" : sb.toString();
     }
 }

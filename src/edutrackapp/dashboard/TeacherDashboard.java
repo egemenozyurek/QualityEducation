@@ -10,34 +10,102 @@ import java.awt.*;
 
 /**
  *
- * @author dhali
+ * @author dhali, egeme
  */
 public class TeacherDashboard extends JFrame {
 
     private final User loggedUser;
+    private final TimeTable timeTable;
+    private final RepeatSessionGenerator generator = new RepeatSessionGenerator();
+    private JTable tableView;
+    private WeeklyGridPanel gridPanel;
 
-    public TeacherDashboard(User loggedUser) {
+    public TeacherDashboard(User loggedUser, TimeTable timeTable) {
         this.loggedUser = loggedUser;
+        this.timeTable = timeTable;
+        
         setupUI();
+    }
+    
+    private void doAdd() {
+        String topic = JOptionPane.showInputDialog(this, "Topic?");
+        if (topic == null || topic.isBlank()) return;
+        String day = JOptionPane.showInputDialog(this, "Day?");
+        String start = JOptionPane.showInputDialog(this, "Start time?");
+        String end = JOptionPane.showInputDialog(this, "End time?");
+        ClassSession s = new ClassSession(topic, day, start, end);
+        timeTable.addSession(s);
+        refreshUI();
+    }
+
+    private void doDelete() {
+        String topic = JOptionPane.showInputDialog(this, "Topic to delete?");
+        if (topic == null || topic.isBlank()) return;
+        boolean ok = timeTable.removeSessionByTopic(topic);
+        if (!ok) JOptionPane.showMessageDialog(this, "Topic not found");
+        refreshUI();
+    }
+
+    private void doMarkDiff() {
+        String topic = JOptionPane.showInputDialog(this, "Which topic to mark as challenging?");
+        ClassSession s = timeTable.findByTipic(topic);
+        if (s != null) { s.setDifficultyLevel(5); JOptionPane.showMessageDialog(this, "Marked challenging"); }
+        else JOptionPane.showMessageDialog(this, "Not found");
+        refreshUI();
+    }
+
+    private void doMarkMissed() {
+        String topic = JOptionPane.showInputDialog(this, "Which topic was missed?");
+        ClassSession s = timeTable.findByTipic(topic);
+        if (s != null) { s.setAttended(false); JOptionPane.showMessageDialog(this, "Marked missed"); }
+        else JOptionPane.showMessageDialog(this, "Not found");
+        refreshUI();
+    }
+
+    private void doAdaptive() {
+        generator.applyAdaptiveRules(timeTable);
+        JOptionPane.showMessageDialog(this, "Adaptive sessions added (if rules matched).");
+        refreshUI();
+    }
+
+    private void refreshUI() {
+        getContentPane().remove(gridPanel);
+        gridPanel = new WeeklyGridPanel(timeTable);
+        add(gridPanel, BorderLayout.NORTH);
+        tableView.setModel(new TimeTableModel(timeTable.getSessions()));
+        revalidate();
+        repaint();
     }
 
     private void setupUI() {
-        setTitle("EduTrack - Teacher Dashboard");
-        setSize(600, 400);
+        setTitle("Teacher Dashboard - " + loggedUser);
+        setSize(1000,700);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(8,8));
 
-        JPanel panel = new JPanel();
-        panel.setBackground(new Color(20, 26, 40)); // dark blue-ish
-        panel.setLayout(new BorderLayout());
+        gridPanel = new WeeklyGridPanel(timeTable);
+        add(gridPanel, BorderLayout.NORTH);
 
-        JLabel lbl = new JLabel(
-                "Welcome, " + loggedUser.getName() + " (Teacher)",
-                SwingConstants.CENTER);
-        lbl.setForeground(Color.WHITE);
-        lbl.setFont(new Font("SansSerif", Font.BOLD, 20));
+        tableView = new JTable(new TimeTableModel(timeTable.getSessions()));
+        add(new JScrollPane(tableView), BorderLayout.CENTER);
 
-        panel.add(lbl, BorderLayout.CENTER);
-        add(panel);
+        JButton addBtn = new JButton("Add Session");
+        JButton delBtn = new JButton("Delete by Topic");
+        JButton diffBtn = new JButton("Mark Challenging");
+        JButton missBtn = new JButton("Mark Missed");
+        JButton adaptiveBtn = new JButton("Generate Adaptive Sessions");
+        JButton refresh = new JButton("Refresh View");
+
+        addBtn.addActionListener(e -> doAdd());
+        delBtn.addActionListener(e -> doDelete());
+        diffBtn.addActionListener(e -> doMarkDiff());
+        missBtn.addActionListener(e -> doMarkMissed());
+        adaptiveBtn.addActionListener(e -> doAdaptive());
+        refresh.addActionListener(e -> refreshUI());
+
+        JPanel p = new JPanel();
+        p.add(addBtn); p.add(delBtn); p.add(diffBtn); p.add(missBtn); p.add(adaptiveBtn); p.add(refresh);
+        add(p, BorderLayout.SOUTH);
     }
 }
