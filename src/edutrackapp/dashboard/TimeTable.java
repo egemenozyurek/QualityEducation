@@ -46,7 +46,7 @@ public class TimeTable {
     }
     
     //testing
-    public ClassSession findByTipic (String topic) {
+    public ClassSession findByTopic (String topic) {
         for (ClassSession s : sessions) {
             if (s.getTopic().equalsIgnoreCase(topic)) {
                 return s;

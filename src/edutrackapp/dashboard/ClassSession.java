@@ -28,8 +28,8 @@ public class ClassSession {
     public ClassSession(String topic, String day, String startTime, String endTime, String sessionType) {
         this(topic, day, startTime, endTime);
         this.sessionType = sessionType;
-    }
-
+    } 
+    
     public String getTopic() {
         return topic;
     }

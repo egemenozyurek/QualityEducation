@@ -20,10 +20,12 @@ import edutrackapp.dashboard.TimeTable;
  * Login screen UI with account creation option.
  */
 public class LoginScreen extends JFrame implements ActionListener {
+       
     private JTextField txtEmail;
     private JPasswordField txtPassword;
     private JButton btnLogin, btnCreate;
     private final ProfileManager profileM;
+    private User loggedUser;
 
     public LoginScreen() {
         profileM = new ProfileManager();
@@ -149,11 +151,27 @@ public class LoginScreen extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (validateLogin()) {
+        String email = txtEmail.getText().trim();
+        String password = new String(txtPassword.getPassword());
+        
+        System.out.println("Login denemesi: " + email);
+        
+        // 1. Login yap
+        loggedUser = profileM.login(email, password);
+        
+        if (loggedUser != null) {
             JOptionPane.showMessageDialog(this, "Login successful!");
+            
+            // DEBUG: Database'deki son durumu göster
+            profileM.getCurrentUser();
+            
             startApp();
         } else {
-            showError();
+            JOptionPane.showMessageDialog(this, 
+                "Invalid credentials. Please try again.\n" +
+                "Test credentials:\n" +
+                "Email: test@example.com\n" +
+                "Password: 123456");
         }
     }
 
@@ -162,24 +180,29 @@ public class LoginScreen extends JFrame implements ActionListener {
     }
 
     public void startApp() {
-        System.out.println("Launching dashboard...");
-        String email = txtEmail.getText();
-        User loggedUser = profileM.getUserByEmail(email);
-
         if (loggedUser == null) {
-            JOptionPane.showMessageDialog(this, "Login error.");
+            JOptionPane.showMessageDialog(this, "No user logged in!");
             return;
         }
-
-        if (loggedUser.getRole().equalsIgnoreCase("student")) {
-            TimeTable timeTable = new TimeTable();
-            new StudentDashboard(loggedUser, timeTable).setVisible(true);
-            dispose();
-        } else {
-            TimeTable timeTable = new TimeTable();
-            new TeacherDashboard(loggedUser, timeTable).setVisible(true);
-            dispose();
-        }
+        
+        System.out.println("🚀 Dashboard is opening: " + 
+                          loggedUser.getName() + " (" + loggedUser.getRole() + ")");
+        
+        // Dispose login screen first
+        dispose();
+        
+        // Open appropriate dashboard
+        SwingUtilities.invokeLater(() -> {
+            if (loggedUser.getRole().equalsIgnoreCase("student")) {
+                System.out.println("Opening Student Dashboard...");
+                StudentDashboard studentDash = new StudentDashboard(loggedUser);
+                studentDash.setVisible(true);
+            } else {
+                System.out.println("Opening Teacher Dashboard...");
+                TeacherDashboard teacherDash = new TeacherDashboard(loggedUser);
+                teacherDash.setVisible(true);
+            }
+        });
     }
 
     /**
@@ -220,4 +243,5 @@ public class LoginScreen extends JFrame implements ActionListener {
         }
     }
 }
+
 

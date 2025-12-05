@@ -15,16 +15,16 @@ public class Question {
     private String optionB;
     private String optionC;
     private String optionD;
-    private char correctOption; // 'A', 'B', 'C', or 'D'
-    private String category;    // e.g. "Science", "Geography"
+    private char correctOption; // option 'A', 'B', 'C', or 'D'
+    private String category;    // categories include: "Science", "Geography" , etc.
 
     public Question(String text,
-                    String optionA,
-                    String optionB,
-                    String optionC,
-                    String optionD,
-                    char correctOption,
-                    String category) {
+            String optionA,
+            String optionB,
+            String optionC,
+            String optionD,
+            char correctOption,
+            String category) {
         this.text = text;
         this.optionA = optionA;
         this.optionB = optionB;
@@ -33,8 +33,8 @@ public class Question {
         this.correctOption = Character.toUpperCase(correctOption);
         this.category = category;
     }
-    //  getters
 
+    //  getters
     public String getText() {
         return text;
     }
@@ -62,5 +62,34 @@ public class Question {
     public String getCategory() {
         return category;
     }
-}
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void setOptionA(String optionA) {
+        this.optionA = optionA;
+    }
+
+    public void setOptionB(String optionB) {
+        this.optionB = optionB;
+    }
+
+    public void setOptionC(String optionC) {
+        this.optionC = optionC;
+    }
+
+    public void setOptionD(String optionD) {
+        this.optionD = optionD;
+    }
+
+    public void setCorrectOption(char correctOption) {
+        this.correctOption = correctOption;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
     
+    
+}

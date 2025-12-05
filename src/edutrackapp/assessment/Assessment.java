@@ -9,17 +9,17 @@ package edutrackapp.assessment;
  * @author dhali
  */
 public class Assessment {
+
     private String id;
     private String studentName;
     private int maxMarks;
     private int obtainedMarks;
-    
+
     private Question[] questions;
     private char[] studentAnswers;
     private int questionCount;
 
     // constructor
-
     public Assessment(String id, String studentName, int maxMarks, int obtainedMarks, Question[] questions, char[] studentAnswers, int questionCount) {
         this.id = id;
         this.studentName = studentName;
@@ -29,6 +29,7 @@ public class Assessment {
         this.studentAnswers = null;
         this.questionCount = 0;
     }
+
     // constructor for MCQ questions
     public Assessment(String id, String studentName, Question[] questions) {
         this.id = id;
@@ -48,9 +49,8 @@ public class Assessment {
     public void setObtainedMarks(int obtainedMarks) {
         this.obtainedMarks = obtainedMarks;
     }
-    
-    //getters
 
+    //getters
     public String getId() {
         return id;
     }
@@ -78,5 +78,58 @@ public class Assessment {
     public int getQuestionCount() {
         return questionCount;
     }
-    
+
+    public void recordAnswer(int index, char option) {
+        if (studentAnswers == null) {
+            return;
+        }
+        if (index < 0 || index >= questionCount) {
+            return;
+        }
+        studentAnswers[index] = Character.toUpperCase(option);
+    }
+
+    public void autoGrade() {
+        if (questions == null || studentAnswers == null) {
+            return;
+        }
+        int correct = 0;
+
+        for (int i = 0; i < questionCount; i++) {
+            char chosen = studentAnswers[i];
+            if (chosen != 0 && chosen == questions[i].getCorrectOption()) {
+                correct++;
+            }
+        }
+        obtainedMarks = correct;
+    }
+
+    public double getPercentage() {
+        if (maxMarks <= 0) {
+            return 0.0;
+        }
+        return (obtainedMarks * 100.0) / maxMarks;
+    }
+
+    public String getGrade() {
+        double p = getPercentage();
+        if (p >= 70) {
+            return "A";
+        }
+        if (p >= 60) {
+            return "B";
+        }
+        if (p >= 50) {
+            return "C";
+        }
+        if (p >= 40) {
+            return "D";
+        }
+        return "F";
+    }
+
+    @Override
+    public String toString() {
+        return "Assessment{" + "id='" + id + '\'' + ", studentName='" + studentName + '\'' + ", maxMarks=" + maxMarks + ", obtainedMarks=" + obtainedMarks + ", percentage=" + String.format("%.1f", getPercentage()) + ", grade='" + getGrade() + '\'' + '}';
+    }
 }
